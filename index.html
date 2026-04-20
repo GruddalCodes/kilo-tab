@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kilo.Tab — Earn Your Gear</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#f97316"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Kilo.Tab"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d0d0f;--panel:#161618;--panel2:#1e1e22;--border:#2a2a30;
+  --text:#f0f0f5;--muted:#7a7a8a;--dim:#3a3a45;
+  --orange:#f97316;--orange2:#fb923c;
+  --green:#22c55e;--blue:#38bdf8;--purple:#a78bfa;
+  --red:#f87171;--gold:#fbbf24;--teal:#2dd4bf;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+button,input,select,textarea{font-family:'Barlow',sans-serif;}
+
+/* NAV */
+.top-nav{background:var(--panel);border-bottom:1px solid var(--border);padding:0 20px;position:sticky;top:0;z-index:50;}
+.nav-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:54px;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange);}
+.logo span{color:var(--text);font-weight:400;}
+.nav-tabs{display:flex;gap:2px;}
+.nav-tab{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;border:none;background:transparent;text-transform:uppercase;letter-spacing:.5px;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{background:var(--orange);color:#fff;}
+
+/* PAGES */
+.page{display:none;max-width:800px;margin:0 auto;padding:24px 16px 80px;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp .35s ease forwards;}
+
+/* HERO STATS */
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+@media(max-width:600px){.hero-stats{grid-template-columns:1fr 1fr;}}
+.hero-stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.hero-stat.featured{background:var(--orange);border-color:var(--orange);}
+.hs-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.hs-label.lt{color:rgba(255,255,255,.7);}
+.hs-value{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.hs-value.lt{color:#fff;}
+.hs-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.hs-sub.lt{color:rgba(255,255,255,.7);}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+/* FIELDS */
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--orange);}
+.field input::placeholder{color:var(--dim);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:480px){.row2{grid-template-columns:1fr;}.row3{grid-template-columns:1fr;}}
+
+/* TYPE BUTTONS */
+.type-row{display:flex;gap:8px;margin-bottom:14px;}
+.type-btn{flex:1;padding:10px 6px;border-radius:8px;border:1.5px solid var(--border);background:var(--panel2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;letter-spacing:.3px;text-transform:uppercase;}
+.type-btn.active-run  {border-color:var(--orange);background:rgba(249,115,22,.12);color:var(--orange);}
+.type-btn.active-ruck {border-color:var(--green);background:rgba(34,197,94,.12);color:var(--green);}
+.type-btn.active-cardio{border-color:var(--blue);background:rgba(56,189,248,.12);color:var(--blue);}
+
+/* ALLOCATION PANEL */
+.alloc-panel{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+.alloc-panel-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.alloc-item-row{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;}
+.alloc-item-row:last-child{margin-bottom:0;}
+.alloc-item-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.alloc-item-name{flex:1;font-size:14px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.alloc-item-progress{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted);}
+.alloc-mini-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:8px;}
+.alloc-mini-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--orange),var(--green));transition:width .4s;}
+.alloc-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.alloc-minus,.alloc-plus{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:var(--panel2);color:var(--text);font-size:18px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:300;}
+.alloc-minus:hover{border-color:var(--red);color:var(--red);}
+.alloc-plus:hover{border-color:var(--green);color:var(--green);}
+.alloc-credit{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--green);min-width:60px;text-align:center;}
+.alloc-all-btn{padding:6px 12px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.alloc-all-btn:hover{border-color:var(--orange);color:var(--orange);}
+.alloc-rate-info{font-size:11px;color:var(--dim);margin-left:auto;}
+.alloc-summary{font-size:11px;color:var(--muted);text-align:right;margin-top:8px;}
+.alloc-summary.warn{color:var(--red);}
+
+/* LOG BUTTON */
+.log-btn{width:100%;padding:13px;background:var(--orange);border:none;border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.log-btn:hover{background:var(--orange2);transform:translateY(-1px);}
+.log-btn:disabled{background:var(--dim);cursor:not-allowed;transform:none;}
+
+/* TAGS */
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.tag-need{background:rgba(56,189,248,.15);color:var(--blue);}
+.tag-want{background:rgba(167,139,250,.15);color:var(--purple);}
+.tag-run{background:rgba(249,115,22,.12);color:var(--orange);}
+.tag-ruck{background:rgba(34,197,94,.12);color:var(--green);}
+.tag-cardio{background:rgba(56,189,248,.12);color:var(--blue);}
+.tag-both{background:rgba(251,191,36,.1);color:var(--gold);}
+
+/* WISHLIST ITEMS */
+.items-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.items-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.add-btn{padding:8px 16px;background:var(--orange);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;transition:all .2s;}
+.add-btn:hover{background:var(--orange2);}
+.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.filter-btn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.5px;text-transform:uppercase;}
+.filter-btn.active{border-color:var(--orange);color:var(--orange);}
+.sort-row{display:flex;gap:6px;margin-bottom:16px;align-items:center;}
+.sort-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-right:2px;}
+.sort-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;text-transform:uppercase;font-weight:600;}
+.sort-btn.active{background:var(--panel2);color:var(--text);border-color:var(--dim);}
+
+.item-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;transition:border-color .2s;}
+.item-card:hover{border-color:var(--dim);}
+.item-card.completed{border-color:var(--green);}
+.item-card.almost{border-color:var(--gold);}
+.almost-banner{background:rgba(251,191,36,.1);border-bottom:1px solid rgba(251,191,36,.2);padding:6px 16px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+.item-photo{width:100%;height:160px;object-fit:cover;display:block;}
+.item-photo-placeholder{width:100%;height:100px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;transition:background .2s;border-bottom:1px solid var(--border);}
+.item-photo-placeholder:hover{background:var(--dim);}
+.item-body{padding:16px;}
+.item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.item-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;line-height:1.15;}
+.item-tags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
+.item-price-block{text-align:right;flex-shrink:0;}
+.item-price{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--orange);line-height:1;}
+.item-price-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.progress-wrap{margin-bottom:10px;}
+.progress-labels{display:flex;justify-content:space-between;margin-bottom:5px;}
+.prog-earned{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green);}
+.prog-target{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--muted);}
+.progress-bar-bg{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--green));transition:width .6s ease;}
+.item-card.completed .progress-bar-fill{background:var(--green);}
+.item-card.almost .progress-bar-fill{background:linear-gradient(90deg,var(--orange),var(--gold));}
+.prog-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.prog-sub.done{color:var(--green);font-weight:600;}
+.item-rates{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.rate-chip{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;text-align:center;}
+.rate-chip-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.rate-chip-value{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;margin-top:1px;}
+.item-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);}
+.item-km{font-size:12px;color:var(--muted);}
+.item-actions{display:flex;gap:6px;}
+.act-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;letter-spacing:.5px;text-transform:uppercase;font-weight:600;}
+.act-btn:hover{border-color:var(--orange);color:var(--orange);}
+.act-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.act-btn.unalloc:hover{border-color:var(--gold);color:var(--gold);}
+.completed-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(34,197,94,.15);border:1px solid var(--green);border-radius:20px;font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;text-transform:uppercase;}
+
+/* HISTORY */
+.history-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.hist-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.hist-icon.run{background:rgba(249,115,22,.12);}
+.hist-icon.ruck{background:rgba(34,197,94,.12);}
+.hist-icon.cardio{background:rgba(56,189,248,.12);}
+.hist-info{flex:1;min-width:0;}
+.hist-dist{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;}
+.hist-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.hist-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.hist-chip{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--panel2);color:var(--muted);border:1px solid var(--border);}
+.hist-right{text-align:right;flex-shrink:0;}
+.hist-date{font-size:12px;color:var(--muted);}
+.del-btn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:2px 4px;transition:color .15s;margin-top:4px;}
+.del-btn:hover{color:var(--red);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:480px;margin:auto;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;}
+.modal-section{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;}
+.rate-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.rate-field{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
+.rate-field-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.rate-field input{width:100%;background:transparent;border:none;color:var(--text);font-size:16px;font-weight:700;text-align:center;outline:none;font-family:'Barlow Condensed',sans-serif;}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
+.modal-btn{flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.5px;text-transform:uppercase;border:none;}
+.modal-btn.primary{background:var(--orange);color:#fff;}
+.modal-btn.primary:hover{background:var(--orange2);}
+.modal-btn.secondary{background:var(--panel2);color:var(--muted);border:1px solid var(--border);}
+
+/* PHOTO UPLOAD */
+.photo-upload-zone{width:100%;height:120px;border:2px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;margin-bottom:12px;background:var(--panel2);position:relative;overflow:hidden;}
+.photo-upload-zone:hover{border-color:var(--orange);}
+.photo-upload-zone img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.photo-upload-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.photo-upload-zone:hover .photo-upload-overlay{display:flex;}
+.photo-label{font-size:12px;color:var(--muted);margin-top:6px;}
+
+/* SESSION SUMMARY MODAL */
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.summary-row:last-child{border-bottom:none;}
+.summary-item-name{font-size:14px;font-weight:600;}
+.summary-earn{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green);}
+.summary-km{font-size:12px;color:var(--muted);}
+
+/* MISC */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty-state .big{font-size:44px;display:block;margin-bottom:12px;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--border);color:var(--text);padding:11px 24px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-inner">
+    <div class="logo">Kilo<span>.Tab</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="goTo('dashboard')" id="ntab-dashboard">Home</button>
+      <button class="nav-tab" onclick="goTo('wishlist')"  id="ntab-wishlist">Wishlist</button>
+      <button class="nav-tab" onclick="goTo('history')"   id="ntab-history">History</button>
+    </div>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="hero-stats fade-up" id="heroStats"></div>
+  <div class="card fade-up">
+    <div class="card-title">// Log a session</div>
+    <div class="type-row">
+      <button class="type-btn active-run" id="tbtn-run"    onclick="setActivity('run')">🏃 Run</button>
+      <button class="type-btn"            id="tbtn-ruck"   onclick="setActivity('ruck')">🎒 Ruck</button>
+      <button class="type-btn"            id="tbtn-cardio" onclick="setActivity('cardio')">🔥 Cardio</button>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Distance (km)</label>
+        <input type="number" id="log-dist" placeholder="0.00" step="0.01" min="0" oninput="updateAllocations()"/>
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="log-date"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <input type="text" id="log-notes" placeholder="e.g. Morning run at Punggol Waterway"/>
+    </div>
+    <div class="alloc-panel">
+      <div class="alloc-panel-title">Allocate to wishlist items</div>
+      <div id="allocRows"></div>
+      <div class="alloc-summary" id="allocSummary"></div>
+    </div>
+    <button class="log-btn" onclick="logSession()">Log Session →</button>
+  </div>
+</div>
+
+<!-- WISHLIST -->
+<div class="page" id="page-wishlist">
+  <div class="items-header">
+    <div class="items-title">Wishlist</div>
+    <button class="add-btn" onclick="openAddItem()">+ Add Item</button>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('need',this)">Needs</button>
+    <button class="filter-btn" onclick="setFilter('want',this)">Wants</button>
+    <button class="filter-btn" onclick="setFilter('active',this)">In Progress</button>
+    <button class="filter-btn" onclick="setFilter('done',this)">Earned ✓</button>
+  </div>
+  <div class="sort-row">
+    <span class="sort-label">Sort:</span>
+    <button class="sort-btn active" onclick="setSort('progress',this)">Progress</button>
+    <button class="sort-btn" onclick="setSort('price',this)">Price</button>
+    <button class="sort-btn" onclick="setSort('category',this)">Category</button>
+    <button class="sort-btn" onclick="setSort('added',this)">Added</button>
+  </div>
+  <div id="itemsList"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div style="margin-bottom:18px;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Session Log</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;" id="hist-summary"></div>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ADD/EDIT ITEM MODAL -->
+<div class="modal-overlay" id="itemModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Add Item</div>
+    <div class="field">
+      <label>Item name</label>
+      <input type="text" id="item-name" placeholder="e.g. GORUCK GR1 Backpack"/>
+    </div>
+
+    <!-- Photo upload -->
+    <label style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Product photo (optional)</label>
+    <div class="photo-upload-zone" onclick="document.getElementById('photo-input').click()">
+      <img id="photo-preview" src="" alt="" style="display:none;"/>
+      <div class="photo-upload-overlay">Change photo</div>
+      <div id="photo-placeholder" style="text-align:center;">
+        <div style="font-size:28px;margin-bottom:4px;">📷</div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px;">Tap to upload</div>
+      </div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)"/>
+
+    <div class="row2">
+      <div class="field">
+        <label>Target price ($)</label>
+        <input type="number" id="item-price" placeholder="0" min="0" step="0.01"/>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="item-category">
+          <option value="need">Need</option>
+          <option value="want">Want</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-section">$ earned per km — set per activity</div>
+    <div class="rate-row">
+      <div class="rate-field">
+        <div class="rate-field-label">🏃 Run</div>
+        <input type="number" id="rate-run" placeholder="0.50" min="0" step="0.01"/>
+      </div>
+      <div class="rate-field">
+        <div class="rate-field-label">🎒 Ruck</div>
+        <input type="number" id="rate-ruck" placeholder="1.00" min="0" step="0.01"/>
+      </div>
+      <div class="rate-field">
+        <div class="rate-field-label">🔥 Cardio</div>
+        <input type="number" id="rate-cardio" placeholder="0.30" min="0" step="0.01"/>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:12px;">
+      <label>Notes / link (optional)</label>
+      <input type="text" id="item-notes" placeholder="URL, size, colour..."/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal('itemModal')">Cancel</button>
+      <button class="modal-btn primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- SESSION SUMMARY MODAL -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <div class="modal-title">Session Summary 🎯</div>
+    <div id="summaryContent"></div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="closeModal('summaryModal')">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNALLOCATE MODAL -->
+<div class="modal-overlay" id="unallocModal">
+  <div class="modal">
+    <div class="modal-title">Unallocate KM</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:16px;">Remove earned credit from this item. This cannot be undone.</div>
+    <div class="field">
+      <label>$ to remove</label>
+      <input type="number" id="unalloc-amount" placeholder="0.00" min="0" step="0.01"/>
+    </div>
+    <div style="font-size:12px;color:var(--muted);" id="unalloc-info"></div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal('unallocModal')">Cancel</button>
+      <button class="modal-btn primary" style="background:var(--gold);color:#000;" onclick="confirmUnalloc()">Remove Credit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SUPABASE CONFIG ──
+// Open in Cursor → Ctrl+H → replace these two placeholders with your real values
+const SB_URL = 'https://nwekhvpyaxoibdstbmgc.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZWtodnB5YXhvaWJkc3RibWdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NzYwMzYsImV4cCI6MjA5MjI1MjAzNn0.nonvOsb_vwoTdZx62YpzhR5k_NRI6Vok7yO8MXLXIAk';
+
+async function sbSelect(table) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=id.desc`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbUpsert(table, row) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation'
+    },
+    body: JSON.stringify(row)
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbDelete(table, id) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+  });
+  if(!res.ok) throw new Error(await res.text());
+}
+
+// ── STATE ──
+let sessions  = JSON.parse(localStorage.getItem('runtab_sessions') || '[]');
+let items     = JSON.parse(localStorage.getItem('runtab_items')    || '[]');
+let activity  = 'run';
+let filter    = 'all';
+let sortBy    = 'progress';
+let editingId = null;
+let unallocId = null;
+let pendingPhoto = null;
+
+// ── SYNC ──
+async function loadFromSupabase() {
+  if(SB_URL === 'YOUR_SUPABASE_URL') return; // not configured yet
+  try {
+    const [dbSessions, dbItems] = await Promise.all([
+      sbSelect('sessions'),
+      sbSelect('items')
+    ]);
+    sessions = dbSessions.map(r => ({
+      id:       r.id,
+      type:     r.type,
+      distance: r.distance,
+      date:     r.date,
+      notes:    r.notes || '',
+      allocs:   typeof r.allocs === 'string' ? JSON.parse(r.allocs) : (r.allocs || []),
+      timestamp:r.timestamp || '',
+    }));
+    items = dbItems.map(r => ({
+      id:        String(r.id),
+      name:      r.name,
+      price:     r.price,
+      category:  r.category,
+      notes:     r.notes || '',
+      rates:     typeof r.rates === 'string' ? JSON.parse(r.rates) : (r.rates || {}),
+      photo:     r.photo || null,
+      allocated: r.allocated || 0,
+      completed: r.completed || false,
+    }));
+    localStorage.setItem('runtab_sessions', JSON.stringify(sessions));
+    localStorage.setItem('runtab_items', JSON.stringify(items));
+    // Refresh active page
+    const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+    if(activePage==='dashboard') renderDashboard();
+    if(activePage==='wishlist')  renderWishlist();
+    if(activePage==='history')   renderHistory();
+  } catch(e) { console.log('Supabase load failed, using local data:', e.message); }
+}
+
+// ── NAVIGATION ──
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('ntab-'+page).classList.add('active');
+  if(page==='dashboard') renderDashboard();
+  if(page==='wishlist')  renderWishlist();
+  if(page==='history')   renderHistory();
+}
+
+// ── ACTIVITY ──
+function setActivity(type) {
+  activity = type;
+  ['run','ruck','cardio'].forEach(t => {
+    const btn = document.getElementById('tbtn-'+t);
+    btn.className = 'type-btn' + (t===type ? ' active-'+type : '');
+  });
+  updateAllocations();
+}
+
+// ── HERO STATS ──
+function renderDashboard() {
+  const totalKm = sessions.reduce((s,r)=>s+r.distance,0);
+  const byType  = t => sessions.filter(r=>r.type===t).reduce((s,r)=>s+r.distance,0);
+  const totalEarned = items.reduce((s,i)=>s+kmToCredit(i),0);
+
+  document.getElementById('heroStats').innerHTML = `
+    <div class="hero-stat featured">
+      <div class="hs-label lt">Total Distance</div>
+      <div class="hs-value lt" style="font-family:'Barlow Condensed',sans-serif;">${totalKm.toFixed(1)}<span style="font-size:14px;font-weight:400;"> km</span></div>
+      <div class="hs-sub lt">${sessions.length} session${sessions.length!==1?'s':''}</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-label">Credit Earned</div>
+      <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;color:var(--green)">$${totalEarned.toFixed(0)}</div>
+      <div class="hs-sub">across ${items.length} item${items.length!==1?'s':''}</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-label">Run / Ruck / Cardio</div>
+      <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;">${byType('run').toFixed(0)} / ${byType('ruck').toFixed(0)} / ${byType('cardio').toFixed(0)}</div>
+      <div class="hs-sub">km each</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-label">Items Active</div>
+      <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;">${items.filter(i=>!i.completed).length}</div>
+      <div class="hs-sub">${items.filter(i=>i.completed).length} earned ✓</div>
+    </div>`;
+
+  const d = document.getElementById('log-date');
+  if(d && !d.value) d.value = new Date().toISOString().split('T')[0];
+  updateAllocations();
+}
+
+// ── KM → CREDIT ──
+function kmToCredit(item) {
+  const allocated = item.allocated || 0;
+  // allocated stores dollar value directly now
+  return allocated;
+}
+
+function getRate(item, actType) {
+  const rates = item.rates || {};
+  return parseFloat(rates[actType]) || 0;
+}
+
+// ── ALLOCATION PANEL ──
+function updateAllocations() {
+  const dist = parseFloat(document.getElementById('log-dist')?.value) || 0;
+  const activeItems = items.filter(i => !i.completed);
+  const rows = document.getElementById('allocRows');
+  const summary = document.getElementById('allocSummary');
+  if(!rows) return;
+
+  if(!activeItems.length) {
+    rows.innerHTML = `<div style="font-size:13px;color:var(--muted);text-align:center;padding:8px;">No active wishlist items — add one in Wishlist</div>`;
+    if(summary) summary.textContent = '';
+    return;
+  }
+
+  rows.innerHTML = activeItems.map(item => {
+    const rate = getRate(item, activity);
+    const pct  = Math.min((kmToCredit(item)/item.price)*100,100);
+    const maxCredit = (dist * rate).toFixed(2);
+    return `<div class="alloc-item-row">
+      <div class="alloc-item-top">
+        <div class="alloc-item-name">${escHtml(item.name)}</div>
+        <div class="alloc-item-progress">${pct.toFixed(0)}%</div>
+      </div>
+      <div class="alloc-mini-bar"><div class="alloc-mini-fill" style="width:${pct}%;"></div></div>
+      <div class="alloc-controls">
+        <button class="alloc-minus" onclick="adjustAlloc('${item.id}',-1)">−</button>
+        <div class="alloc-credit" id="alloc-val-${item.id}">$0</div>
+        <button class="alloc-plus"  onclick="adjustAlloc('${item.id}',+1)">+</button>
+        <button class="alloc-all-btn" onclick="allocateAll('${item.id}')">All</button>
+        <div class="alloc-rate-info">${rate>0?`$${rate}/km`:`<span style="color:var(--red)">no rate set</span>`}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateAllocSummary();
+}
+
+// Store pending allocations as dollar amounts
+let pendingAllocs = {};
+
+function adjustAlloc(itemId, delta) {
+  const dist = parseFloat(document.getElementById('log-dist')?.value) || 0;
+  const item = items.find(i=>i.id===itemId);
+  if(!item) return;
+  const rate = getRate(item, activity);
+  if(rate <= 0) { showToast(`No ${activity} rate set for this item`); return; }
+  if(dist <= 0) { showToast('Enter a distance first'); return; }
+
+  const maxCredit = dist * rate;
+  const current   = pendingAllocs[itemId] || 0;
+  const newVal    = Math.max(0, Math.min(maxCredit, current + delta));
+  pendingAllocs[itemId] = parseFloat(newVal.toFixed(2));
+
+  const el = document.getElementById('alloc-val-'+itemId);
+  if(el) el.textContent = '$' + pendingAllocs[itemId].toFixed(2);
+  updateAllocSummary();
+}
+
+function allocateAll(itemId) {
+  const dist = parseFloat(document.getElementById('log-dist')?.value) || 0;
+  const item = items.find(i=>i.id===itemId);
+  if(!item) return;
+  const rate = getRate(item, activity);
+  if(rate <= 0) { showToast(`No ${activity} rate set for this item`); return; }
+  if(dist <= 0) { showToast('Enter a distance first'); return; }
+
+  const maxCredit = parseFloat((dist * rate).toFixed(2));
+  pendingAllocs[itemId] = maxCredit;
+
+  const el = document.getElementById('alloc-val-'+itemId);
+  if(el) el.textContent = '$' + maxCredit.toFixed(2);
+  updateAllocSummary();
+}
+
+function updateAllocSummary() {
+  const dist  = parseFloat(document.getElementById('log-dist')?.value) || 0;
+  const total = Object.values(pendingAllocs).reduce((s,v)=>s+v,0);
+  const el    = document.getElementById('allocSummary');
+  if(!el) return;
+
+  // Check against each item's max credit
+  let valid = true;
+  for(const [id, credit] of Object.entries(pendingAllocs)) {
+    const item = items.find(i=>i.id===id);
+    if(!item) continue;
+    const rate = getRate(item, activity);
+    if(rate > 0 && credit > dist * rate + 0.001) { valid = false; break; }
+  }
+
+  const count = Object.values(pendingAllocs).filter(v=>v>0).length;
+  el.textContent = `$${total.toFixed(2)} allocated to ${count} item${count!==1?'s':''}`;
+  el.className   = 'alloc-summary' + (!valid ? ' warn' : '');
+}
+
+// ── LOG SESSION ──
+function logSession() {
+  const dist  = parseFloat(document.getElementById('log-dist').value);
+  const date  = document.getElementById('log-date').value;
+  const notes = document.getElementById('log-notes').value.trim();
+  if(!dist || dist <= 0) { showToast('Enter a distance first'); return; }
+
+  // Validate allocations
+  for(const [id, credit] of Object.entries(pendingAllocs)) {
+    const item = items.find(i=>i.id===id);
+    if(!item) continue;
+    const rate = getRate(item, activity);
+    if(rate > 0 && credit > dist * rate + 0.001) {
+      showToast('Over-allocated for ' + item.name); return;
+    }
+  }
+
+  // Apply allocations
+  const allocs = [];
+  for(const [id, credit] of Object.entries(pendingAllocs)) {
+    if(credit <= 0) continue;
+    const item = items.find(i=>i.id===id);
+    if(!item) continue;
+    const rate = getRate(item, activity);
+    const km   = rate > 0 ? credit / rate : 0;
+    item.allocated = parseFloat(((item.allocated||0) + credit).toFixed(2));
+    if(item.allocated >= item.price) item.completed = true;
+    allocs.push({ itemId: id, credit, km: parseFloat(km.toFixed(2)) });
+  }
+
+  sessions.unshift({
+    id: Date.now(),
+    type: activity,
+    distance: dist,
+    date: date || new Date().toISOString().split('T')[0],
+    notes,
+    allocs,
+  });
+
+  saveData();
+  // Sync session + updated items to Supabase in background
+  syncSessionToSupabase(sessions[0]);
+  allocs.forEach(a => {
+    const item = items.find(i=>i.id===a.itemId);
+    if(item) syncItemToSupabase(item);
+  });
+  document.getElementById('log-dist').value  = '';
+  document.getElementById('log-notes').value = '';
+  pendingAllocs = {};
+
+  // Show summary if any allocations were made
+  if(allocs.length) showSummary(dist, allocs);
+  else showToast(`✓ ${dist.toFixed(1)}km logged`);
+
+  renderDashboard();
+}
+
+function showSummary(dist, allocs) {
+  const rows = allocs.map(a => {
+    const item = items.find(i=>i.id===a.itemId);
+    if(!item) return '';
+    const newPct = Math.min((item.allocated/item.price)*100,100);
+    const badge  = item.completed ? '<span class="completed-badge">✓ Earned!</span>' : '';
+    return `<div class="summary-row">
+      <div>
+        <div class="summary-item-name">${escHtml(item.name)}</div>
+        <div class="summary-km">${a.km.toFixed(2)} km → ${newPct.toFixed(0)}% complete ${badge}</div>
+      </div>
+      <div class="summary-earn">+$${a.credit.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('summaryContent').innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">${dist.toFixed(1)} km ${activity} logged</div>
+    ${rows}`;
+  document.getElementById('summaryModal').classList.add('open');
+}
+
+// ── WISHLIST ──
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWishlist();
+}
+
+function setSort(s, btn) {
+  sortBy = s;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWishlist();
+}
+
+function renderWishlist() {
+  let list = [...items];
+  if(filter==='need')   list = list.filter(i=>i.category==='need');
+  if(filter==='want')   list = list.filter(i=>i.category==='want');
+  if(filter==='active') list = list.filter(i=>!i.completed);
+  if(filter==='done')   list = list.filter(i=>i.completed);
+
+  // Sort
+  list.sort((a,b) => {
+    if(sortBy==='progress') {
+      const pa = (kmToCredit(a)/a.price), pb = (kmToCredit(b)/b.price);
+      return pb - pa;
+    }
+    if(sortBy==='price')    return b.price - a.price;
+    if(sortBy==='category') return a.category.localeCompare(b.category);
+    if(sortBy==='added')    return parseInt(b.id) - parseInt(a.id);
+    return 0;
+  });
+
+  const el = document.getElementById('itemsList');
+  if(!list.length) {
+    el.innerHTML = `<div class="empty-state"><span class="big">🎒</span>Nothing here yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(item => {
+    const earned  = kmToCredit(item);
+    const pct     = Math.min((earned/item.price)*100,100);
+    const almost  = pct >= 80 && !item.completed;
+    const kmLeft  = Object.entries(item.rates||{})
+      .filter(([,r])=>r>0)
+      .map(([t,r])=>`${((item.price-earned)/r).toFixed(1)}km ${t}`)
+      .join(' · ');
+
+    const rateChips = ['run','ruck','cardio'].map(t => {
+      const r = (item.rates||{})[t] || 0;
+      const icons = {run:'🏃',ruck:'🎒',cardio:'🔥'};
+      return `<div class="rate-chip">
+        <div class="rate-chip-label">${icons[t]} ${t}</div>
+        <div class="rate-chip-value" style="color:${r>0?'var(--text)':'var(--dim)'}">${r>0?'$'+r+'/km':'—'}</div>
+      </div>`;
+    }).join('');
+
+    const photoHtml = item.photo
+      ? `<img class="item-photo" src="${item.photo}" alt="${escHtml(item.name)}"/>`
+      : '';
+
+    return `<div class="item-card${item.completed?' completed':almost?' almost':''}">
+      ${almost && !item.completed ? `<div class="almost-banner">🔥 Almost there — ${(100-pct).toFixed(0)}% to go!</div>` : ''}
+      ${item.completed ? `<div style="background:rgba(34,197,94,.08);border-bottom:1px solid rgba(34,197,94,.2);padding:6px 16px;font-size:11px;font-weight:700;color:var(--green);letter-spacing:1px;text-transform:uppercase;">✓ EARNED</div>` : ''}
+      ${photoHtml}
+      <div class="item-body">
+        <div class="item-top">
+          <div>
+            <div class="item-name">${escHtml(item.name)}</div>
+            <div class="item-tags">
+              <span class="tag ${item.category==='need'?'tag-need':'tag-want'}">${item.category}</span>
+            </div>
+          </div>
+          <div class="item-price-block">
+            <div class="item-price">$${item.price.toFixed(0)}</div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-labels">
+            <div class="prog-earned">$${earned.toFixed(2)}</div>
+            <div class="prog-target">of $${item.price.toFixed(2)}</div>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;"></div></div>
+          <div class="prog-sub ${item.completed?'done':''}">
+            ${item.completed
+              ? `✓ Fully earned!`
+              : `${pct.toFixed(0)}% · still need: ${kmLeft||'set rates to see'}`}
+          </div>
+        </div>
+        <div class="item-rates">${rateChips}</div>
+        <div class="item-footer">
+          <div class="item-km">$${earned.toFixed(2)} earned · ${sessions.filter(s=>s.allocs?.some(a=>a.itemId===item.id)).length} sessions</div>
+          <div class="item-actions">
+            ${item.completed ? '<span class="completed-badge">✓ Earned</span>' : ''}
+            <button class="act-btn unalloc" onclick="openUnalloc('${item.id}')">↩ Unalloc</button>
+            <button class="act-btn" onclick="editItem('${item.id}')">Edit</button>
+            <button class="act-btn danger" onclick="deleteItem('${item.id}')">Delete</button>
+          </div>
+        </div>
+        ${item.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">${escHtml(item.notes)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ADD / EDIT ITEM ──
+function openAddItem() {
+  editingId = null;
+  pendingPhoto = null;
+  document.getElementById('modalTitle').textContent = 'Add Item';
+  ['item-name','item-price','item-notes','rate-run','rate-ruck','rate-cardio'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('item-category').value = 'want';
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-placeholder').style.display = 'block';
+  document.getElementById('itemModal').classList.add('open');
+}
+
+function editItem(id) {
+  const item = items.find(i=>i.id===id);
+  if(!item) return;
+  editingId = id;
+  pendingPhoto = item.photo || null;
+  document.getElementById('modalTitle').textContent = 'Edit Item';
+  document.getElementById('item-name').value     = item.name;
+  document.getElementById('item-price').value    = item.price;
+  document.getElementById('item-notes').value    = item.notes||'';
+  document.getElementById('item-category').value = item.category;
+  document.getElementById('rate-run').value      = (item.rates?.run)||'';
+  document.getElementById('rate-ruck').value     = (item.rates?.ruck)||'';
+  document.getElementById('rate-cardio').value   = (item.rates?.cardio)||'';
+  const preview = document.getElementById('photo-preview');
+  const placeholder = document.getElementById('photo-placeholder');
+  if(item.photo) {
+    preview.src = item.photo;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+  } else {
+    preview.style.display = 'none';
+    placeholder.style.display = 'block';
+  }
+  document.getElementById('itemModal').classList.add('open');
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingPhoto = e.target.result;
+    const preview = document.getElementById('photo-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    preview.src = pendingPhoto;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveItem() {
+  const name     = document.getElementById('item-name').value.trim();
+  const price    = parseFloat(document.getElementById('item-price').value);
+  const category = document.getElementById('item-category').value;
+  const notes    = document.getElementById('item-notes').value.trim();
+  const rates    = {
+    run:    parseFloat(document.getElementById('rate-run').value)    || 0,
+    ruck:   parseFloat(document.getElementById('rate-ruck').value)   || 0,
+    cardio: parseFloat(document.getElementById('rate-cardio').value) || 0,
+  };
+
+  if(!name)              { showToast('Enter an item name'); return; }
+  if(!price || price<=0) { showToast('Enter a target price'); return; }
+  if(!rates.run && !rates.ruck && !rates.cardio) { showToast('Set at least one activity rate'); return; }
+
+  if(editingId) {
+    const item = items.find(i=>i.id===editingId);
+    if(item) {
+      Object.assign(item, { name, price, category, notes, rates });
+      if(pendingPhoto !== undefined) item.photo = pendingPhoto;
+      item.completed = kmToCredit(item) >= price;
+    }
+  } else {
+    items.push({
+      id: Date.now().toString(),
+      name, price, category, notes, rates,
+      photo: pendingPhoto || null,
+      allocated: 0,
+      completed: false,
+    });
+  }
+
+  saveData();
+  // Sync to Supabase in background
+  const saved = editingId ? items.find(i=>i.id===editingId) : items[items.length-1];
+  if(saved) syncItemToSupabase(saved);
+  closeModal('itemModal');
+  renderWishlist();
+  updateAllocations();
+  showToast(editingId ? 'Item updated ✓' : 'Item added ✓');
+}
+
+function deleteItem(id) {
+  if(!confirm('Delete this item? All earned credit for this item will be lost.')) return;
+  items = items.filter(i=>i.id!==id);
+  saveData();
+  deleteItemFromSupabase(id);
+  renderWishlist();
+  updateAllocations();
+}
+
+// ── UNALLOCATE ──
+function openUnalloc(id) {
+  unallocId = id;
+  const item = items.find(i=>i.id===id);
+  if(!item) return;
+  document.getElementById('unalloc-amount').value = '';
+  document.getElementById('unalloc-info').textContent = `Currently $${(item.allocated||0).toFixed(2)} earned on "${item.name}"`;
+  document.getElementById('unallocModal').classList.add('open');
+}
+
+function confirmUnalloc() {
+  const amount = parseFloat(document.getElementById('unalloc-amount').value);
+  if(!amount || amount <= 0) { showToast('Enter an amount to remove'); return; }
+  const item = items.find(i=>i.id===unallocId);
+  if(!item) return;
+  item.allocated = Math.max(0, parseFloat(((item.allocated||0) - amount).toFixed(2)));
+  item.completed = item.allocated >= item.price;
+  saveData();
+  syncItemToSupabase(item);
+  closeModal('unallocModal');
+  renderWishlist();
+  updateAllocations();
+  showToast(`Removed $${amount.toFixed(2)} from ${item.name}`);
+}
+
+// ── HISTORY ──
+function renderHistory() {
+  const totalKm = sessions.reduce((s,r)=>s+r.distance,0);
+  document.getElementById('hist-summary').textContent =
+    `${sessions.length} session${sessions.length!==1?'s':''} · ${totalKm.toFixed(1)} km total`;
+
+  const el = document.getElementById('historyList');
+  if(!sessions.length) {
+    el.innerHTML = `<div class="empty-state"><span class="big">🏃</span>No sessions yet.<br>Head to Home to log your first one.</div>`;
+    return;
+  }
+
+  const icons = {run:'🏃',ruck:'🎒',cardio:'🔥'};
+  el.innerHTML = sessions.map(s => {
+    const chips = s.allocs?.map(a => {
+      const item = items.find(i=>i.id===a.itemId);
+      return item ? `<span class="hist-chip">${escHtml(item.name.slice(0,18))} +$${a.credit.toFixed(2)}</span>` : '';
+    }).join('') || '';
+
+    return `<div class="history-item">
+      <div class="hist-icon ${s.type}">${icons[s.type]||'🏃'}</div>
+      <div class="hist-info">
+        <div class="hist-dist" style="font-family:'Barlow Condensed',sans-serif;">${s.distance.toFixed(1)} <span style="font-size:13px;color:var(--muted);font-weight:400;">km ${s.type}</span></div>
+        <div class="hist-meta">${s.date}${s.notes?' · '+s.notes:''}</div>
+        ${chips ? `<div class="hist-chips">${chips}</div>` : ''}
+      </div>
+      <div class="hist-right">
+        <div class="hist-date">${formatDate(s.date)}</div>
+        <button class="del-btn" onclick="deleteSession(${s.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteSession(id) {
+  if(!confirm('Delete this session? Note: KM allocations from this session will NOT be automatically reversed — use Unallocate on each item if needed.')) return;
+  sessions = sessions.filter(s=>s.id!==id);
+  saveData();
+  deleteSessionFromSupabase(id);
+  renderHistory();
+}
+
+// ── UTILS ──
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if(id==='itemModal') { editingId = null; pendingPhoto = null; }
+  if(id==='unallocModal') unallocId = null;
+}
+
+function saveData() {
+  // Always save locally first — instant
+  localStorage.setItem('runtab_sessions', JSON.stringify(sessions));
+  localStorage.setItem('runtab_items', JSON.stringify(items));
+}
+
+async function syncSessionToSupabase(session) {
+  if(SB_URL === 'YOUR_SUPABASE_URL') return;
+  try {
+    await sbUpsert('sessions', {
+      id:        session.id,
+      type:      session.type,
+      distance:  session.distance,
+      date:      session.date,
+      notes:     session.notes || '',
+      allocs:    JSON.stringify(session.allocs || []),
+      timestamp: session.timestamp || new Date().toISOString(),
+    });
+  } catch(e) { console.log('Session sync failed:', e.message); }
+}
+
+async function syncItemToSupabase(item) {
+  if(SB_URL === 'YOUR_SUPABASE_URL') return;
+  try {
+    await sbUpsert('items', {
+      id:        item.id,
+      name:      item.name,
+      price:     item.price,
+      category:  item.category,
+      notes:     item.notes || '',
+      rates:     JSON.stringify(item.rates || {}),
+      photo:     item.photo || null,
+      allocated: item.allocated || 0,
+      completed: item.completed || false,
+    });
+  } catch(e) { console.log('Item sync failed:', e.message); }
+}
+
+async function deleteSessionFromSupabase(id) {
+  if(SB_URL === 'YOUR_SUPABASE_URL') return;
+  try { await sbDelete('sessions', id); }
+  catch(e) { console.log('Delete failed:', e.message); }
+}
+
+async function deleteItemFromSupabase(id) {
+  if(SB_URL === 'YOUR_SUPABASE_URL') return;
+  try { await sbDelete('items', id); }
+  catch(e) { console.log('Delete failed:', e.message); }
+}
+
+function formatDate(d) {
+  if(!d) return '';
+  return new Date(d+'T00:00:00').toLocaleDateString('en-SG',{day:'numeric',month:'short'});
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── INIT ──
+renderDashboard();
+// Load from Supabase on startup — syncs all devices
+loadFromSupabase();
+</script>
+<script>
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('Kilo.Tab SW registered'))
+      .catch(e => console.log('SW failed:', e));
+  });
+}
+</script>
+</body>
+</html>
