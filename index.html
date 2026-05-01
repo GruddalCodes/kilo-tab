@@ -71,6 +71,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .type-btn.active-run  {border-color:var(--orange);background:rgba(249,115,22,.12);color:var(--orange);}
 .type-btn.active-ruck {border-color:var(--green);background:rgba(34,197,94,.12);color:var(--green);}
 .type-btn.active-cardio{border-color:var(--blue);background:rgba(56,189,248,.12);color:var(--blue);}
+.type-btn.active-row{border-color:var(--teal);background:rgba(45,212,191,.12);color:var(--teal);}
 
 /* ALLOCATION PANEL */
 .alloc-panel{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
@@ -105,6 +106,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .tag-run{background:rgba(249,115,22,.12);color:var(--orange);}
 .tag-ruck{background:rgba(34,197,94,.12);color:var(--green);}
 .tag-cardio{background:rgba(56,189,248,.12);color:var(--blue);}
+.tag-row{background:rgba(45,212,191,.12);color:var(--teal);}
 .tag-both{background:rgba(251,191,36,.1);color:var(--gold);}
 
 /* WISHLIST ITEMS */
@@ -164,6 +166,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .hist-icon.run{background:rgba(249,115,22,.12);}
 .hist-icon.ruck{background:rgba(34,197,94,.12);}
 .hist-icon.cardio{background:rgba(56,189,248,.12);}
+.hist-icon.row{background:rgba(45,212,191,.12);}
 .hist-info{flex:1;min-width:0;}
 .hist-dist{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;}
 .hist-meta{font-size:12px;color:var(--muted);margin-top:2px;}
@@ -234,6 +237,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <button class="type-btn active-run" id="tbtn-run"    onclick="setActivity('run')">🏃 Run</button>
       <button class="type-btn"            id="tbtn-ruck"   onclick="setActivity('ruck')">🎒 Ruck</button>
       <button class="type-btn"            id="tbtn-cardio" onclick="setActivity('cardio')">🔥 Cardio</button>
+      <button class="type-btn"            id="tbtn-row"    onclick="setActivity('row')">🚣 Row/SkiErg</button>
     </div>
     <div class="row2">
       <div class="field">
@@ -326,7 +330,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     </div>
 
     <div class="modal-section">$ earned per km — set per activity</div>
-    <div class="rate-row">
+    <div class="rate-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
       <div class="rate-field">
         <div class="rate-field-label">🏃 Run</div>
         <input type="number" id="rate-run" placeholder="0.50" min="0" step="0.01"/>
@@ -338,6 +342,10 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <div class="rate-field">
         <div class="rate-field-label">🔥 Cardio</div>
         <input type="number" id="rate-cardio" placeholder="0.30" min="0" step="0.01"/>
+      </div>
+      <div class="rate-field">
+        <div class="rate-field-label">🚣 Row/Ski</div>
+        <input type="number" id="rate-row" placeholder="0.80" min="0" step="0.01"/>
       </div>
     </div>
 
@@ -480,7 +488,7 @@ function goTo(page) {
 // ── ACTIVITY ──
 function setActivity(type) {
   activity = type;
-  ['run','ruck','cardio'].forEach(t => {
+  ['run','ruck','cardio','row'].forEach(t => {
     const btn = document.getElementById('tbtn-'+t);
     btn.className = 'type-btn' + (t===type ? ' active-'+type : '');
   });
@@ -506,8 +514,8 @@ function renderDashboard() {
     </div>
     <div class="hero-stat">
       <div class="hs-label">Run / Ruck / Cardio</div>
-      <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;">${byType('run').toFixed(0)} / ${byType('ruck').toFixed(0)} / ${byType('cardio').toFixed(0)}</div>
-      <div class="hs-sub">km each</div>
+      <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;">${byType('run').toFixed(0)} / ${byType('ruck').toFixed(0)} / ${byType('cardio').toFixed(0)} / ${byType('row').toFixed(0)}</div>
+      <div class="hs-sub">run / ruck / cardio / row</div>
     </div>
     <div class="hero-stat">
       <div class="hs-label">Items Active</div>
@@ -753,9 +761,9 @@ function renderWishlist() {
       .map(([t,r])=>`${((item.price-earned)/r).toFixed(1)}km ${t}`)
       .join(' · ');
 
-    const rateChips = ['run','ruck','cardio'].map(t => {
+    const rateChips = ['run','ruck','cardio','row'].map(t => {
       const r = (item.rates||{})[t] || 0;
-      const icons = {run:'🏃',ruck:'🎒',cardio:'🔥'};
+      const icons = {run:'🏃',ruck:'🎒',cardio:'🔥',row:'🚣'};
       return `<div class="rate-chip">
         <div class="rate-chip-label">${icons[t]} ${t}</div>
         <div class="rate-chip-value" style="color:${r>0?'var(--text)':'var(--dim)'}">${r>0?'$'+r+'/km':'—'}</div>
@@ -815,7 +823,7 @@ function openAddItem() {
   editingId = null;
   pendingPhoto = null;
   document.getElementById('modalTitle').textContent = 'Add Item';
-  ['item-name','item-price','item-notes','rate-run','rate-ruck','rate-cardio'].forEach(id=>document.getElementById(id).value='');
+  ['item-name','item-price','item-notes','rate-run','rate-ruck','rate-cardio','rate-row'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('item-category').value = 'want';
   document.getElementById('photo-preview').style.display = 'none';
   document.getElementById('photo-placeholder').style.display = 'block';
@@ -835,6 +843,7 @@ function editItem(id) {
   document.getElementById('rate-run').value      = (item.rates?.run)||'';
   document.getElementById('rate-ruck').value     = (item.rates?.ruck)||'';
   document.getElementById('rate-cardio').value   = (item.rates?.cardio)||'';
+  document.getElementById('rate-row').value      = (item.rates?.row)||'';
   const preview = document.getElementById('photo-preview');
   const placeholder = document.getElementById('photo-placeholder');
   if(item.photo) {
@@ -872,11 +881,12 @@ function saveItem() {
     run:    parseFloat(document.getElementById('rate-run').value)    || 0,
     ruck:   parseFloat(document.getElementById('rate-ruck').value)   || 0,
     cardio: parseFloat(document.getElementById('rate-cardio').value) || 0,
+    row:    parseFloat(document.getElementById('rate-row').value)    || 0,
   };
 
   if(!name)              { showToast('Enter an item name'); return; }
   if(!price || price<=0) { showToast('Enter a target price'); return; }
-  if(!rates.run && !rates.ruck && !rates.cardio) { showToast('Set at least one activity rate'); return; }
+  if(!rates.run && !rates.ruck && !rates.cardio && !rates.row) { showToast('Set at least one activity rate'); return; }
 
   if(editingId) {
     const item = items.find(i=>i.id===editingId);
@@ -951,7 +961,7 @@ function renderHistory() {
     return;
   }
 
-  const icons = {run:'🏃',ruck:'🎒',cardio:'🔥'};
+  const icons = {run:'🏃',ruck:'🎒',cardio:'🔥',row:'🚣'};
   el.innerHTML = sessions.map(s => {
     const chips = s.allocs?.map(a => {
       const item = items.find(i=>i.id===a.itemId);
