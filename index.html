@@ -230,6 +230,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div id="ktSyncStatus" style="font-size:11px;color:var(--muted);letter-spacing:.5px;"></div>
+    <button onclick="manualSync()" id="ktSyncBtn"
+      style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px;"
+      onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↻ Sync</button>
+  </div>
   <div class="hero-stats fade-up" id="heroStats"></div>
   <div class="card fade-up">
     <div class="card-title">// Log a session</div>
@@ -437,21 +444,36 @@ let unallocId = null;
 let pendingPhoto = null;
 
 // ── SYNC ──
-async function loadFromSupabase() {
-  if(SB_URL === 'YOUR_SUPABASE_URL') return; // not configured yet
+function setKtSyncStatus(msg, color='var(--muted)') {
+  const el = document.getElementById('ktSyncStatus');
+  if(el) { el.textContent = msg; el.style.color = color; }
+}
+function setKtSyncBtn(loading) {
+  const btn = document.getElementById('ktSyncBtn');
+  if(btn) btn.textContent = loading ? '\u21bb Syncing...' : '\u21bb Sync';
+}
+async function manualSync() { await loadFromSupabase(true); }
+
+async function loadFromSupabase(manual=false) {
+  if(SB_URL === 'YOUR_SUPABASE_URL') {
+    setKtSyncStatus('Supabase not connected — add keys in code');
+    return;
+  }
+  setKtSyncBtn(true);
+  setKtSyncStatus('Syncing...', 'var(--muted)');
   try {
     const [dbSessions, dbItems] = await Promise.all([
       sbSelect('sessions'),
       sbSelect('items')
     ]);
     sessions = dbSessions.map(r => ({
-      id:       r.id,
-      type:     r.type,
-      distance: r.distance,
-      date:     r.date,
-      notes:    r.notes || '',
-      allocs:   typeof r.allocs === 'string' ? JSON.parse(r.allocs) : (r.allocs || []),
-      timestamp:r.timestamp || '',
+      id:        r.id,
+      type:      r.type,
+      distance:  r.distance,
+      date:      r.date,
+      notes:     r.notes || '',
+      allocs:    typeof r.allocs === 'string' ? JSON.parse(r.allocs) : (r.allocs || []),
+      timestamp: r.timestamp || '',
     }));
     items = dbItems.map(r => ({
       id:        String(r.id),
@@ -465,13 +487,19 @@ async function loadFromSupabase() {
       completed: r.completed || false,
     }));
     localStorage.setItem('runtab_sessions', JSON.stringify(sessions));
-    localStorage.setItem('runtab_items', JSON.stringify(items));
-    // Refresh active page
+    localStorage.setItem('runtab_items',    JSON.stringify(items));
+    const now = new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem('kt_last_sync', now);
+    setKtSyncStatus('Synced at ' + now + ' \u00b7 ' + sessions.length + ' sessions', 'var(--green)');
     const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
     if(activePage==='dashboard') renderDashboard();
     if(activePage==='wishlist')  renderWishlist();
     if(activePage==='history')   renderHistory();
-  } catch(e) { console.log('Supabase load failed, using local data:', e.message); }
+  } catch(e) {
+    setKtSyncStatus('Sync failed \u2014 check connection', 'var(--red)');
+    console.log('Supabase load failed:', e.message);
+  }
+  setKtSyncBtn(false);
 }
 
 // ── NAVIGATION ──
@@ -1066,7 +1094,8 @@ function showToast(msg) {
 
 // ── INIT ──
 renderDashboard();
-// Load from Supabase on startup — syncs all devices
+const ktLastSync = localStorage.getItem('kt_last_sync');
+if(ktLastSync) setKtSyncStatus(`Last synced ${ktLastSync} · syncing now...`, 'var(--muted)');
 loadFromSupabase();
 </script>
 <script>
