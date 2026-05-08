@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kilo.Tab — Earn Your Gear</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d0d0f'/><text y='24' x='4' font-size='22'>🏃</text></svg>"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#f97316"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -436,6 +437,7 @@ async function sbDelete(table, id) {
 // ── STATE ──
 let sessions  = JSON.parse(localStorage.getItem('runtab_sessions') || '[]');
 let items     = JSON.parse(localStorage.getItem('runtab_items')    || '[]');
+let savedPool = parseFloat(localStorage.getItem('runtab_pool')     || '0'); // unallocated KM bank
 let activity  = 'run';
 let filter    = 'all';
 let sortBy    = 'progress';
@@ -488,6 +490,8 @@ async function loadFromSupabase(manual=false) {
     }));
     localStorage.setItem('runtab_sessions', JSON.stringify(sessions));
     localStorage.setItem('runtab_items',    JSON.stringify(items));
+    // Pool is device-local — restore from localStorage
+    savedPool = parseFloat(localStorage.getItem('runtab_pool') || '0');
     const now = new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
     localStorage.setItem('kt_last_sync', now);
     setKtSyncStatus('Synced at ' + now + ' \u00b7 ' + sessions.length + ' sessions', 'var(--green)');
@@ -549,6 +553,11 @@ function renderDashboard() {
       <div class="hs-label">Items Active</div>
       <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;">${items.filter(i=>!i.completed).length}</div>
       <div class="hs-sub">${items.filter(i=>i.completed).length} earned ✓</div>
+    </div>
+    <div class="hero-stat" style="${savedPool>0?'border-color:var(--gold);background:rgba(251,191,36,.05);':''}">
+      <div class="hs-label" style="color:${savedPool>0?'var(--gold)':'var(--muted)'};">KM Banked</div>
+      <div class="hs-value" style="font-family:'Barlow Condensed',sans-serif;color:var(--gold);">${savedPool.toFixed(1)}</div>
+      <div class="hs-sub" style="color:${savedPool>0?'var(--gold)':'var(--muted)'};">km saved for later</div>
     </div>`;
 
   const d = document.getElementById('log-date');
@@ -602,11 +611,47 @@ function updateAllocations() {
     </div>`;
   }).join('');
 
+  // Save for later row
+  rows.innerHTML += `
+  <div class="alloc-item-row" style="border-color:var(--gold);background:rgba(251,191,36,.05);margin-top:8px;">
+    <div class="alloc-item-top">
+      <div class="alloc-item-name" style="color:var(--gold);">🏦 Save for later</div>
+      <div class="alloc-item-progress" style="color:var(--gold);">${savedPool.toFixed(2)} km banked</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Bank KM now — allocate to any item in Wishlist later</div>
+    <div class="alloc-controls">
+      <button class="alloc-minus" onclick="adjustPool(-1)" style="border-color:var(--gold);color:var(--gold);">−</button>
+      <div class="alloc-credit" id="pool-val" style="color:var(--gold);">0 km</div>
+      <button class="alloc-plus" onclick="adjustPool(+1)" style="border-color:var(--gold);color:var(--gold);">+</button>
+      <button class="alloc-all-btn" onclick="poolAll()" style="border-color:var(--gold);color:var(--gold);">All</button>
+      <div class="alloc-rate-info" style="color:var(--muted);">km saved</div>
+    </div>
+  </div>`;
+
   updateAllocSummary();
 }
 
 // Store pending allocations as dollar amounts
 let pendingAllocs = {};
+let pendingPool   = 0; // KM to save to pool this session
+
+function adjustPool(delta) {
+  const dist = parseFloat(document.getElementById('log-dist')?.value) || 0;
+  if(dist <= 0) { showToast('Enter a distance first'); return; }
+  pendingPool = Math.max(0, Math.min(dist, parseFloat((pendingPool + delta).toFixed(2))));
+  const el = document.getElementById('pool-val');
+  if(el) el.textContent = pendingPool.toFixed(2) + ' km';
+  updateAllocSummary();
+}
+
+function poolAll() {
+  const dist = parseFloat(document.getElementById('log-dist')?.value) || 0;
+  if(dist <= 0) { showToast('Enter a distance first'); return; }
+  pendingPool = parseFloat(dist.toFixed(2));
+  const el = document.getElementById('pool-val');
+  if(el) el.textContent = pendingPool.toFixed(2) + ' km';
+  updateAllocSummary();
+}
 
 function adjustAlloc(itemId, delta) {
   const dist = parseFloat(document.getElementById('log-dist')?.value) || 0;
@@ -692,6 +737,11 @@ function logSession() {
     allocs.push({ itemId: id, credit, km: parseFloat(km.toFixed(2)) });
   }
 
+  // Bank any KM saved for later
+  if(pendingPool > 0) {
+    savedPool = parseFloat((savedPool + pendingPool).toFixed(2));
+  }
+
   sessions.unshift({
     id: Date.now(),
     type: activity,
@@ -711,6 +761,7 @@ function logSession() {
   document.getElementById('log-dist').value  = '';
   document.getElementById('log-notes').value = '';
   pendingAllocs = {};
+  pendingPool   = 0;
 
   // Show summary if any allocations were made
   if(allocs.length) showSummary(dist, allocs);
@@ -835,6 +886,7 @@ function renderWishlist() {
           <div class="item-km">$${earned.toFixed(2)} earned · ${sessions.filter(s=>s.allocs?.some(a=>a.itemId===item.id)).length} sessions</div>
           <div class="item-actions">
             ${item.completed ? '<span class="completed-badge">✓ Earned</span>' : ''}
+            ${!item.completed && savedPool > 0 ? `<button class="act-btn" onclick="openUsePool('${item.id}')" style="border-color:var(--gold);color:var(--gold);">🏦 Use ${savedPool.toFixed(1)}km</button>` : ''}
             <button class="act-btn unalloc" onclick="openUnalloc('${item.id}')">↩ Unalloc</button>
             <button class="act-btn" onclick="editItem('${item.id}')">Edit</button>
             <button class="act-btn danger" onclick="deleteItem('${item.id}')">Delete</button>
@@ -953,6 +1005,82 @@ function deleteItem(id) {
 }
 
 // ── UNALLOCATE ──
+// ── USE SAVED KM POOL ──
+let usePoolItemId = null;
+
+function openUsePool(id) {
+  usePoolItemId = id;
+  const item = items.find(i=>i.id===id);
+  if(!item) return;
+  document.getElementById('unalloc-amount').value = '';
+  document.getElementById('unalloc-info').innerHTML =
+    `<strong style="color:var(--gold)">🏦 ${savedPool.toFixed(2)} km banked</strong><br/>
+     How many km do you want to allocate to <strong>${escHtml(item.name)}</strong>?<br/>
+     <span style="font-size:11px;color:var(--muted);">Select which activity rate to use:</span>
+     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;" id="poolRatePicker">
+       ${['run','ruck','cardio','row'].map(t => {
+         const r = item.rates?.[t] || 0;
+         if(!r) return '';
+         return `<button onclick="setPoolActivity('${t}')"
+           id="prate-${t}"
+           style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;"
+           onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+           onmouseout="if(!this.classList.contains('sel')){this.style.borderColor='var(--border)';this.style.color='var(--muted)'}">
+           ${t} ($${r}/km)
+         </button>`;
+       }).join('')}
+     </div>`;
+  document.getElementById('modalTitle').textContent = 'Use Saved KM';
+  // Swap confirm button to use pool
+  document.querySelector('#unallocModal .modal-btn.primary').textContent = 'Allocate from Pool';
+  document.querySelector('#unallocModal .modal-btn.primary').onclick = confirmUsePool;
+  document.getElementById('unallocModal').classList.add('open');
+  poolActivityType = null;
+}
+
+let poolActivityType = null;
+function setPoolActivity(type) {
+  poolActivityType = type;
+  document.querySelectorAll('#poolRatePicker button').forEach(b => {
+    b.classList.remove('sel');
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--muted)';
+  });
+  const btn = document.getElementById('prate-'+type);
+  if(btn) {
+    btn.classList.add('sel');
+    btn.style.borderColor = 'var(--gold)';
+    btn.style.color = 'var(--gold)';
+  }
+}
+
+function confirmUsePool() {
+  const km   = parseFloat(document.getElementById('unalloc-amount').value);
+  if(!km || km <= 0)            { showToast('Enter km to allocate'); return; }
+  if(!poolActivityType)         { showToast('Pick an activity rate first'); return; }
+  if(km > savedPool + 0.001)    { showToast(`Only ${savedPool.toFixed(2)} km banked`); return; }
+
+  const item = items.find(i=>i.id===usePoolItemId);
+  if(!item) return;
+  const rate   = item.rates?.[poolActivityType] || 0;
+  if(!rate)  { showToast('No rate set for this activity'); return; }
+
+  const credit = parseFloat((km * rate).toFixed(2));
+  savedPool    = parseFloat(Math.max(0, savedPool - km).toFixed(2));
+  item.allocated = parseFloat(((item.allocated||0) + credit).toFixed(2));
+  item.completed = item.allocated >= item.price;
+
+  saveData();
+  syncItemToSupabase(item);
+  closeModal('unallocModal');
+  // Reset confirm button back to unalloc
+  document.querySelector('#unallocModal .modal-btn.primary').textContent = 'Remove Credit';
+  document.querySelector('#unallocModal .modal-btn.primary').onclick = confirmUnalloc;
+  renderWishlist();
+  renderDashboard();
+  showToast(`✓ ${km.toFixed(2)}km → $${credit.toFixed(2)} added to ${item.name}`);
+}
+
 function openUnalloc(id) {
   unallocId = id;
   const item = items.find(i=>i.id===id);
@@ -1029,7 +1157,8 @@ function closeModal(id) {
 function saveData() {
   // Always save locally first — instant
   localStorage.setItem('runtab_sessions', JSON.stringify(sessions));
-  localStorage.setItem('runtab_items', JSON.stringify(items));
+  localStorage.setItem('runtab_items',    JSON.stringify(items));
+  localStorage.setItem('runtab_pool',     savedPool.toFixed(2));
 }
 
 async function syncSessionToSupabase(session) {
